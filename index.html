@@ -6,141 +6,155 @@
     <title>CopyDrop</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        /* General reset and body styling */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f7f8fa;
+            background-color: #f4f7fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             color: #333;
         }
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
         h1 {
-            text-align: center;
-            color: #4e4e4e;
             font-size: 2.5rem;
+            color: #4a4a4a;
             margin-bottom: 20px;
         }
-        .clipboard-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-        input[type="text"] {
-            width: 80%;
+
+        /* Input and button styling */
+        .clipboard-input {
+            width: 100%;
             padding: 15px;
             font-size: 18px;
-            border: 2px solid #ddd;
             border-radius: 8px;
+            border: 2px solid #ddd;
             outline: none;
-            transition: all 0.3s ease;
-            background-color: #f0f0f0;
+            margin-bottom: 20px;
+            transition: border 0.3s ease;
+            background-color: #fafafa;
         }
-        input[type="text"]:focus {
-            border-color: #007bff;
+        .clipboard-input:focus {
+            border-color: #4caf50;
             background-color: #fff;
         }
-        button {
-            padding: 12px 20px;
-            font-size: 16px;
+        .copy-btn {
+            padding: 14px 30px;
+            font-size: 18px;
             cursor: pointer;
-            background-color: #007bff;
+            background-color: #4caf50;
             color: white;
             border: none;
             border-radius: 8px;
             transition: background-color 0.3s ease;
         }
-        button:hover {
-            background-color: #0056b3;
+        .copy-btn:hover {
+            background-color: #45a049;
         }
-        .chat-list {
+
+        /* Chat history styling */
+        .chat-history {
             margin-top: 30px;
-            width: 100%;
-            max-width: 800px;
-            border-top: 2px solid #ddd;
-            padding-top: 20px;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
         }
         .chat-item {
-            padding: 15px;
             background-color: #f9f9f9;
-            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
             border-radius: 8px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            border-left: 6px solid #4caf50;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
         }
         .chat-item:hover {
-            background-color: #f1f1f1;
-            transform: translateY(-3px);
+            transform: scale(1.02);
+            background-color: #e8f5e9;
         }
+
         .empty-msg {
-            text-align: center;
-            color: #999;
+            font-size: 16px;
+            color: #aaa;
             font-style: italic;
-            margin-top: 20px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            .clipboard-input {
+                font-size: 16px;
+            }
+            .copy-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>CopyDrop - Clipboard Sharing Made Simple</h1>
-        <div class="clipboard-container">
-            <input type="text" id="clipboardInput" placeholder="Type something to copy...">
-            <button onclick="copyText()">Copy to Clipboard</button>
-        </div>
-        <div class="chat-list">
-            <h3>Your Clipboard History</h3>
-            <div id="chatItems" class="empty-msg">No items copied yet.</div>
+        <h1>Welcome to CopyDrop</h1>
+        <input type="text" class="clipboard-input" id="clipboardInput" placeholder="Type something to copy...">
+        <button class="copy-btn" onclick="copyText()">Copy to Clipboard</button>
+
+        <div class="chat-history" id="chatHistory">
+            <div class="empty-msg">No items copied yet.</div>
         </div>
     </div>
 
     <script>
+        // Store clipboard data in localStorage
         let clipboardHistory = JSON.parse(localStorage.getItem('clipboardHistory')) || [];
 
-        // Function to copy text to clipboard
         function copyText() {
-            const text = document.getElementById("clipboardInput").value;
-            if (text.trim() !== "") {
+            const text = document.getElementById("clipboardInput").value.trim();
+
+            if (text) {
+                // Write the text to clipboard
                 navigator.clipboard.writeText(text).then(() => {
-                    alert("Text copied to clipboard!");
+                    // Update history
                     clipboardHistory.push(text);
                     localStorage.setItem('clipboardHistory', JSON.stringify(clipboardHistory));
-                    updateChatList();
-                    document.getElementById("clipboardInput").value = ""; // clear input
+                    updateChatHistory();
+                    document.getElementById("clipboardInput").value = '';  // Clear input after copying
                 });
             }
         }
 
-        // Function to update the chat list (display history)
-        function updateChatList() {
-            const chatItemsContainer = document.getElementById("chatItems");
-            chatItemsContainer.innerHTML = ""; // Clear current list
+        // Update the displayed chat history
+        function updateChatHistory() {
+            const chatHistoryDiv = document.getElementById("chatHistory");
+            chatHistoryDiv.innerHTML = ''; // Clear current items
 
             if (clipboardHistory.length === 0) {
-                chatItemsContainer.innerHTML = '<div class="empty-msg">No items copied yet.</div>';
+                chatHistoryDiv.innerHTML = '<div class="empty-msg">No items copied yet.</div>';
                 return;
             }
 
-            clipboardHistory.forEach((text, index) => {
+            clipboardHistory.forEach(text => {
                 const chatItem = document.createElement("div");
                 chatItem.classList.add("chat-item");
-                chatItem.innerText = `Clipboard ${index + 1}: ${text}`;
-                chatItemsContainer.appendChild(chatItem);
+                chatItem.innerText = text;
+                chatHistoryDiv.appendChild(chatItem);
             });
         }
 
-        // Initial load of the clipboard history
-        updateChatList();
+        // Initialize chat history on page load
+        updateChatHistory();
     </script>
+
 </body>
 </html>
+
 
