@@ -10,87 +10,101 @@
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            background: #f4f7fa;
+            background-color: #f7f8fa;
             color: #333;
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 30px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
         h1 {
             text-align: center;
-            color: #333;
+            color: #4e4e4e;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
         }
         .clipboard-container {
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 20px;
         }
         input[type="text"] {
-            width: 70%;
-            padding: 12px;
+            width: 80%;
+            padding: 15px;
             font-size: 18px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
             outline: none;
             transition: all 0.3s ease;
+            background-color: #f0f0f0;
         }
         input[type="text"]:focus {
-            border-color: #007BFF;
+            border-color: #007bff;
+            background-color: #fff;
         }
         button {
-            padding: 10px 20px;
+            padding: 12px 20px;
             font-size: 16px;
             cursor: pointer;
-            background-color: #007BFF;
+            background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 5px;
-            transition: all 0.3s ease;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
         }
         button:hover {
             background-color: #0056b3;
         }
         .chat-list {
-            margin-top: 20px;
+            margin-top: 30px;
             width: 100%;
-            max-width: 600px;
+            max-width: 800px;
             border-top: 2px solid #ddd;
             padding-top: 20px;
         }
         .chat-item {
-            padding: 12px;
+            padding: 15px;
+            background-color: #f9f9f9;
             border: 1px solid #ddd;
-            margin-bottom: 10px;
-            border-radius: 5px;
+            border-radius: 8px;
+            margin-bottom: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
         .chat-item:hover {
             background-color: #f1f1f1;
+            transform: translateY(-3px);
+        }
+        .empty-msg {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to CopyDrop</h1>
+        <h1>CopyDrop - Clipboard Sharing Made Simple</h1>
         <div class="clipboard-container">
             <input type="text" id="clipboardInput" placeholder="Type something to copy...">
             <button onclick="copyText()">Copy to Clipboard</button>
         </div>
         <div class="chat-list">
             <h3>Your Clipboard History</h3>
-            <div id="chatItems"></div>
+            <div id="chatItems" class="empty-msg">No items copied yet.</div>
         </div>
     </div>
 
     <script>
-        let clipboardHistory = [];
+        let clipboardHistory = JSON.parse(localStorage.getItem('clipboardHistory')) || [];
 
         // Function to copy text to clipboard
         function copyText() {
@@ -98,9 +112,10 @@
             if (text.trim() !== "") {
                 navigator.clipboard.writeText(text).then(() => {
                     alert("Text copied to clipboard!");
-                    // Save to history
                     clipboardHistory.push(text);
+                    localStorage.setItem('clipboardHistory', JSON.stringify(clipboardHistory));
                     updateChatList();
+                    document.getElementById("clipboardInput").value = ""; // clear input
                 });
             }
         }
@@ -110,6 +125,11 @@
             const chatItemsContainer = document.getElementById("chatItems");
             chatItemsContainer.innerHTML = ""; // Clear current list
 
+            if (clipboardHistory.length === 0) {
+                chatItemsContainer.innerHTML = '<div class="empty-msg">No items copied yet.</div>';
+                return;
+            }
+
             clipboardHistory.forEach((text, index) => {
                 const chatItem = document.createElement("div");
                 chatItem.classList.add("chat-item");
@@ -117,6 +137,10 @@
                 chatItemsContainer.appendChild(chatItem);
             });
         }
+
+        // Initial load of the clipboard history
+        updateChatList();
     </script>
 </body>
 </html>
+
